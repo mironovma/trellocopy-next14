@@ -95,6 +95,7 @@ export const NavItem = ({
                         onClick={() => onClick(route.href)}
                         className={cn(
                             "w-full font-normal justify-start pl-10 mb-1",
+                            // Если путь совпадает с роутом, то подсвечиваем этот item
                             pathname === route.href &&
                                 "bg-sky-500/10 text-sky-700"
                         )}
