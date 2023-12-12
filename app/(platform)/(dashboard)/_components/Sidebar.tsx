@@ -1,15 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useOrganization, useOrganizationList } from "@clerk/nextjs";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useLocalStorage } from "usehooks-ts";
-import { useOrganization } from "@clerk/nextjs";
-import { useOrganizationList } from "@clerk/nextjs";
 
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Organization } from "./NavItem";
 import { NavItem } from "./NavItem";
 
@@ -79,7 +77,20 @@ export const Sidebar = ({ storageKey = "t-sidebar-state" }: SidebarProps) => {
     if (!isLoadedOrg || !isLoadedOrgList || userMemberships.isLoading) {
         return (
             <>
-                <Skeleton />
+                <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-10 w-[50%]" />
+                    <Skeleton className="h-10 w-10" />
+                </div>
+                {/**
+                 * Чтобы руками не переписывать каждый раз новую структуру,
+                 * можно прямо в компоненте создавать вложенный компонент.
+                 * См. NavItem внизу. Очень удобно.
+                 */}
+                <div className="space-y-2">
+                    <NavItem.Skeleton />
+                    <NavItem.Skeleton />
+                    <NavItem.Skeleton />
+                </div>
             </>
         );
     }
