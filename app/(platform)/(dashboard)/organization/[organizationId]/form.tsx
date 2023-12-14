@@ -1,8 +1,11 @@
 "use client";
 
-import { create } from "@/actions/create-board";
-import { Button } from "@/components/ui/button";
 import { useFormState } from "react-dom";
+
+import { create } from "@/actions/create-board";
+
+import { FormButton } from "./form-button";
+import { FormInput } from "./form-input";
 
 export const Form = () => {
     /**
@@ -19,26 +22,9 @@ export const Form = () => {
     return (
         <form action={dispatch}>
             <div className="flex flex-col space-y-2">
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    placeholder="Enter a board title"
-                    required
-                    className="border-black border p-1"
-                />
-                {/* Если будет ошибка в валидации, то выведем ее здесь: */}
-                {state.errors?.title ? (
-                    <div>
-                        {state.errors.title.map((error: string) => (
-                            <p key={error} className="text-rose-500">
-                                {error}
-                            </p>
-                        ))}
-                    </div>
-                ) : null}
+                <FormInput errors={state?.errors} />
             </div>
-            <Button type="submit">Submit</Button>
+            <FormButton />
         </form>
     );
 };
