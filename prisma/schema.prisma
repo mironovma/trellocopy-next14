@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// npx prisma generate
+// npx prisma db push
 
 generator client {
   provider = "prisma-client-js"
@@ -8,4 +8,10 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Board {
+  id String @id @default(uuid())
+
+  title String
 }
