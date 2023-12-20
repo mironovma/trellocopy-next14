@@ -21,6 +21,49 @@ model Board {
   imageUserName String @db.Text
   imageLinkHTML String @db.Text
 
+  lists         List[]
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+model List {
+  id            String @id @default(uuid())
+  title         String
+  // Для управления позиционированим задач в доске задач order by... 
+  // В каком порядке будет отображаться у пользователей на экране
+  // position
+  order         Int
+
+  boardId       String
+  // Создаем связанность. Здесь будет храниться инфо о конкретной доске. Связываем List boardId и Board id. Не забываем создать связть в model Board
+  // Удалять будем каскадно, т.е. автоматически будет удалять связанные данные в БД при удалении родительской записи.
+  // Т.е. удаляем родительский элемент (Board), то у удалятся дочерние List
+  board         Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards         Card[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([boardId])
+}
+
+model Card {
+  id            String @id @default(uuid())
+  title         String
+  order         Int
+  // Опциональное поле
+  description   String? @db.Text
+
+  listId        String
+  list          List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([listId])
+}
+
+// После изменения моделей, не забываем делать npx prisma db push -> npx prisma generate
+// Можно еще очистить всю БД: npx prisma migrate reset
