@@ -65,5 +65,32 @@ model Card {
   @@index([listId])
 }
 
+enum Action {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum EntityType {
+  BOARD
+  LIST
+  CARD
+}
+
+model AuditLog {
+  id            String @id @default(uuid())
+  orgId         String
+  action        Action
+  entityId      String
+  entityType    EntityType
+  entityTitle   String
+  userId        String
+  userImage     String @db.Text
+  userName      String @db.Text
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 // После изменения моделей, не забываем делать npx prisma db push -> npx prisma generate
 // Можно еще очистить всю БД: npx prisma migrate reset
