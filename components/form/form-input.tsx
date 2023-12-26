@@ -29,7 +29,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             className,
             id,
             label,
-            type,
+            type = "text",
             placeholder,
             required,
             disabled,
@@ -56,6 +56,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                         id={id}
                         ref={ref}
                         name={id}
+                        type={type}
                         required={required}
                         placeholder={placeholder}
                         defaultValue={defaultValue}
