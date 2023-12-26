@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCardModal } from "@/hooks/useCardModal";
+import { ToggleFeature } from "@/lib/toggle-feature";
 import { fetcher } from "@/lib/fetcher";
 import { CardWithList } from "@/types";
 
@@ -46,8 +47,11 @@ export const CardModal = () => {
                                 <Description data={cardData} />
                             )}
 
-                            {/* TODO: Uploading files */}
-                            {false ? <UploadForm.Skeleton /> : <UploadForm />}
+                            <ToggleFeature
+                                on={<UploadForm />}
+                                off={<></>}
+                                isRelease={false}
+                            />
 
                             {!auditLogsData ? (
                                 <Activity.Skeleton />
