@@ -50,7 +50,7 @@ model List {
 }
 
 model Card {
-  id            String @id @default(uuid())
+  id            String  @id @default(uuid())
   title         String
   order         Int
   // Опциональное поле
@@ -59,8 +59,10 @@ model Card {
   listId        String
   list          List @relation(fields: [listId], references: [id], onDelete: Cascade)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  files         CardFile[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   @@index([listId])
 }
@@ -78,18 +80,32 @@ enum EntityType {
 }
 
 model AuditLog {
-  id            String @id @default(uuid())
-  orgId         String
-  action        Action
-  entityId      String
-  entityType    EntityType
-  entityTitle   String
-  userId        String
-  userImage     String @db.Text
-  userName      String @db.Text
+  id              String @id @default(uuid())
+  orgId           String
+  action          Action
+  entityId        String
+  entityType      EntityType
+  entityTitle     String
+  userId          String
+  userImage       String @db.Text
+  userName        String @db.Text
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CardFile {
+  id              String @id @default(uuid())
+  orgId           String
+  path            String
+  fileName        String
+
+  cardId          String
+  card            Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  uploadedAt      DateTime @default(now())
+
+  @@index([cardId])
 }
 
 // После изменения моделей, не забываем делать npx prisma db push -> npx prisma generate
