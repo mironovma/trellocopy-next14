@@ -13,6 +13,7 @@ import { Actions } from "./actions";
 import { Activity } from "./activity";
 import { Description } from "./descriptions";
 import { Header } from "./header";
+import { UploadForm } from "./upload-form";
 
 export const CardModal = () => {
     const id = useCardModal((state) => state.id);
@@ -46,15 +47,12 @@ export const CardModal = () => {
                                 <Description data={cardData} />
                             )}
 
-<<<<<<< HEAD
                             <ToggleFeature
                                 on={<UploadForm />}
                                 off={<></>}
                                 isRelease={false}
                             />
 
-=======
->>>>>>> 3e4175e9c759d105581be6bbf06a5e950be9447d
                             {!auditLogsData ? (
                                 <Activity.Skeleton />
                             ) : (
