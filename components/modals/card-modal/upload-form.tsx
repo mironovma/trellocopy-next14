@@ -1,11 +1,43 @@
 "use client";
 
+import { ElementRef, useRef, useState } from "react";
 import { FileIcon, FileInputIcon } from "lucide-react";
 
+import { handler } from "@/actions/upload-file";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const UploadForm = () => {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const fileRef = useRef<ElementRef<"input">>(null);
+
+    const onSelectFile = () => {
+        fileRef.current?.click();
+        setIsUploading(true);
+    };
+
+    const onSubmit = (formData: FormData) => {
+        const attachment = formData.get("attachment") as unknown as File;
+        // attachment.name
+        // attachment.size
+        // ...
+        /**
+         * TODO:
+         * Можно получать из клиента в сервер название файла, размер и пр.
+         * А как передать сам файл на сервер из клиента, чтобы можно было сохранить его
+         * куда-нибудь в облако или локально на сервере?
+         */
+        console.log(attachment, "from client");
+
+        setIsUploading(false);
+
+        handler({
+            fileName: attachment.name,
+            fileSize: String(attachment.size),
+        });
+    };
+
     return (
         <div className="flex items-start gap-x-3 w-full">
             <FileIcon className="w-5 h-5 mt-0.5 text-neutral-700" />
@@ -14,17 +46,32 @@ export const UploadForm = () => {
                     Uploaded Files
                 </p>
 
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => {}}
-                    className="h-8 w-auto flex justify-start items-center font-medium py-3 px-3.5 rounded-md text-sm"
-                >
-                    <div className="flex gap-x-1">
-                        <FileInputIcon className="w-4 h-4 text-white" /> Upload
-                        files
-                    </div>
-                </Button>
+                <form action={onSubmit}>
+                    <Button
+                        type="button"
+                        onClick={onSelectFile}
+                        variant="secondary"
+                        size="sm"
+                        className="h-8 w-auto flex justify-start font-medium py-3 px-3.5 rounded-md text-sm mb-3"
+                    >
+                        <div className="flex gap-x-1 items-center">
+                            <FileInputIcon className="w-4 h-4" /> Upload files
+                        </div>
+                    </Button>
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        accept=".pdf, .xls, .xlsx, .doc, .docx"
+                        id="attachment"
+                        name="attachment"
+                        hidden
+                    />
+                    {isUploading && (
+                        <Button type="submit" variant="primary">
+                            Upload
+                        </Button>
+                    )}
+                </form>
             </div>
         </div>
     );
