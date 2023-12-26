@@ -12,7 +12,6 @@ import { Actions } from "./actions";
 import { Activity } from "./activity";
 import { Description } from "./descriptions";
 import { Header } from "./header";
-import { UploadForm } from "./upload-form";
 
 export const CardModal = () => {
     const id = useCardModal((state) => state.id);
@@ -45,9 +44,6 @@ export const CardModal = () => {
                             ) : (
                                 <Description data={cardData} />
                             )}
-
-                            {/* TODO: Uploading files */}
-                            {false ? <UploadForm.Skeleton /> : <UploadForm />}
 
                             {!auditLogsData ? (
                                 <Activity.Skeleton />
