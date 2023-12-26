@@ -50,7 +50,7 @@ export const CardModal = () => {
                             <ToggleFeature
                                 on={<UploadForm />}
                                 off={<></>}
-                                isRelease={false}
+                                isRelease={true}
                             />
 
                             {!auditLogsData ? (
