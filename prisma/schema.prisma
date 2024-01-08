@@ -96,7 +96,7 @@ model AuditLog {
 
 model CardFile {
   id              String @id @default(uuid())
-  orgId           String
+
   path            String
   fileName        String
 
