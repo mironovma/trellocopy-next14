@@ -1,14 +1,38 @@
 "use client";
 
-import { FileIcon, FileInputIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { ElementRef, useRef, useState } from "react";
+import { FileIcon, FileInputIcon, FilesIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { handler } from "@/actions/upload-file";
+import { uploadFileDirectly } from "@/actions/upload-file";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CardFile } from "@prisma/client";
+import { useAction } from "@/hooks/useAction";
+import { deleteCardFile } from "@/actions/delete-file";
+import { useQuery } from "@tanstack/react-query";
+import { fetcher } from "@/lib/fetcher";
 
-export const UploadForm = () => {
+interface UploadFormProps {
+    cardId?: string;
+    files?: CardFile[];
+}
+
+/**
+ * TODO:
+ * Uncaught Error: Only plain objects, and a few built-ins,
+ * can be passed to Server Actions. Classes or null prototypes
+ * are not supported.
+ *
+ * На server action с useAction. Поэтому используем без.
+ *
+ * Просто отправить файл, как FormData могу, но через useActions не дает.
+ */
+
+export const UploadForm = ({ cardId, files }: UploadFormProps) => {
+    const params = useParams();
+
     const [isUploading, setIsUploading] = useState(false);
 
     const fileRef = useRef<ElementRef<"input">>(null);
@@ -18,11 +42,49 @@ export const UploadForm = () => {
         setIsUploading(true);
     };
 
-    const onSubmit2 = (formData: FormData) => {
-        toast.success("File uploaded!");
-        // const file = formData.get("attachment") as File;
+    // const { execute } = useAction(uploadFile, {
+    //     onSuccess: (data) => {
+    //         toast.success(`File ${data.fileName} is uploaded!`);
+    //         setIsUploading(false);
+    //     },
+    //     onError: (error) => {
+    //         toast.error(error);
+    //     },
+    // });
 
-        handler(formData);
+    const { execute: executeDeleteCardFile, isLoading: isLoadingDelete } =
+        useAction(deleteCardFile, {
+            onSuccess: (data) => {
+                toast.success(`File "${data.fileName} deleted!"`);
+            },
+            onError: (error) => {
+                toast.error(error);
+            },
+        });
+
+    const onSubmit = (formData: FormData) => {
+        const cardId = formData.get("cardId") as string;
+
+        uploadFileDirectly(formData, cardId, params.boardId as string);
+
+        setIsUploading(false);
+    };
+
+    const { data: cardFilesData } = useQuery<CardFile[]>({
+        queryKey: ["card-files", cardId],
+        queryFn: () => fetcher(`/api/cards/${cardId}/files`),
+    });
+
+    const onDelete = () => {
+        const boardId = params.boardId as string;
+        const cardID = cardId as string;
+        const fileId = cardFilesData?.[0].id as string;
+
+        executeDeleteCardFile({
+            boardId,
+            cardId: cardID,
+            id: fileId,
+        });
     };
 
     return (
@@ -33,32 +95,73 @@ export const UploadForm = () => {
                     Uploaded Files
                 </p>
 
-                <form action={onSubmit2}>
-                    <Button
-                        type="button"
-                        onClick={onSelectFile}
-                        variant="secondary"
-                        size="sm"
-                        className="h-8 w-auto flex justify-start font-medium py-3 px-3.5 rounded-md text-sm mb-3"
-                    >
-                        <div className="flex gap-x-1 items-center">
-                            <FileInputIcon className="w-4 h-4" /> Upload files
-                        </div>
-                    </Button>
-                    <input
-                        ref={fileRef}
-                        type="file"
-                        accept=".pdf, .xls, .xlsx, .doc, .docx"
-                        id="attachment"
-                        name="attachment"
-                        hidden
-                    />
-                    {isUploading && (
-                        <Button type="submit" variant="primary">
-                            Upload
+                {!!!files?.length && (
+                    <form action={onSubmit}>
+                        <Button
+                            type="button"
+                            onClick={onSelectFile}
+                            variant="secondary"
+                            size="sm"
+                            className="h-8 w-auto flex justify-start font-medium py-3 px-3.5 rounded-md text-sm mb-3"
+                        >
+                            <div className="flex gap-x-1 items-center">
+                                <FileInputIcon className="w-4 h-4" /> Upload
+                                files
+                            </div>
                         </Button>
-                    )}
-                </form>
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept=".pdf, .xls, .xlsx, .doc, .docx"
+                            id="attachment"
+                            name="attachment"
+                            hidden
+                        />
+                        <input hidden value={cardId} name="cardId" />
+                        {isUploading && (
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                className="mb-3"
+                            >
+                                Upload
+                            </Button>
+                        )}
+                    </form>
+                )}
+
+                {/* Будет блочить скачивание файла сам браузер, т.к. файл хранится локально.
+                Как ранее и писал, для сохранения файла нужно использовать готовое клауд решение
+                либо делать под клауд сервер, где будут валидироваться и сканироваться все загружаемые файлы.
+                Если все-таки хочется скачать загруженный фалй, то нужно в настройках хрома (Приватносить и безопасность),
+                перейти в Security и в Safe Browsing нажать No protection  */}
+                <div className="flex flex-col gap-1">
+                    {files &&
+                        files.map((file) => (
+                            <li
+                                className="list-none cursor-pointer"
+                                key={file.id}
+                            >
+                                <div className="flex items-center gap-x-1">
+                                    <FilesIcon className="w-4 h-4" />
+                                    <a
+                                        className="text-primary text-sm hover:underline hover:text-sky-700/90"
+                                        href={file.path}
+                                    >
+                                        {file.fileName}
+                                    </a>
+                                    <Button
+                                        variant="ghost"
+                                        size="inline"
+                                        disabled={isLoadingDelete}
+                                        onClick={onDelete}
+                                    >
+                                        <XIcon className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </li>
+                        ))}
+                </div>
             </div>
         </div>
     );

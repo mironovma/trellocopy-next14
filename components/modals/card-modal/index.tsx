@@ -1,6 +1,6 @@
 "use client";
 
-import { AuditLog } from "@prisma/client";
+import { AuditLog, CardFile } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -34,6 +34,12 @@ export const CardModal = () => {
         queryFn: () => fetcher(`/api/cards/${id}/logs`),
     });
 
+    // Получаем список файлов для конкретной карточки
+    const { data: cardFilesData } = useQuery<CardFile[]>({
+        queryKey: ["card-files", id],
+        queryFn: () => fetcher(`/api/cards/${id}/files`),
+    });
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
@@ -48,7 +54,16 @@ export const CardModal = () => {
                             )}
 
                             <ToggleFeature
-                                on={<UploadForm />}
+                                on={
+                                    !cardData ? (
+                                        <UploadForm.Skeleton />
+                                    ) : (
+                                        <UploadForm
+                                            cardId={cardData && cardData.id}
+                                            files={cardFilesData}
+                                        />
+                                    )
+                                }
                                 off={<></>}
                                 isRelease={true}
                             />
