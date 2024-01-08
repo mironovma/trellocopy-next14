@@ -1,7 +1,8 @@
 "use client";
 
-import { ElementRef, useRef, useState } from "react";
 import { FileIcon, FileInputIcon } from "lucide-react";
+import { ElementRef, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { handler } from "@/actions/upload-file";
 import { Button } from "@/components/ui/button";
@@ -17,25 +18,11 @@ export const UploadForm = () => {
         setIsUploading(true);
     };
 
-    const onSubmit = (formData: FormData) => {
-        const attachment = formData.get("attachment") as unknown as File;
-        // attachment.name
-        // attachment.size
-        // ...
-        /**
-         * TODO:
-         * Можно получать из клиента в сервер название файла, размер и пр.
-         * А как передать сам файл на сервер из клиента, чтобы можно было сохранить его
-         * куда-нибудь в облако или локально на сервере?
-         */
-        console.log(attachment, "from client");
+    const onSubmit2 = (formData: FormData) => {
+        toast.success("File uploaded!");
+        // const file = formData.get("attachment") as File;
 
-        setIsUploading(false);
-
-        handler({
-            fileName: attachment.name,
-            fileSize: String(attachment.size),
-        });
+        handler(formData);
     };
 
     return (
@@ -46,7 +33,7 @@ export const UploadForm = () => {
                     Uploaded Files
                 </p>
 
-                <form action={onSubmit}>
+                <form action={onSubmit2}>
                     <Button
                         type="button"
                         onClick={onSelectFile}
